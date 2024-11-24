@@ -1,0 +1,32 @@
+[
+    {
+        "Channel ID": "UCSyGLZWpjz1hsIUvwAu9gaQ",
+        "Subscribers": "643K",
+        "Total Views": "203,670,493",
+        "Estimated Monthly Earnings": "ZA"
+    },
+    {
+        "Channel ID": "UCQCSrM5gr6srrqnF5RkHdRg",
+        "Error": "Message: no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=130.0.6723.116)\nStacktrace:\n#0 0x60b3bc0266da <unknown>\n#1 0x60b3bbb3af80 <unknown>\n#2 0x60b3bbb112ef <unknown>\n#3 0x60b3bbbb3eed <unknown>\n#4 0x60b3bbbc9f49 <unknown>\n#5 0x60b3bbbab953 <unknown>\n#6 0x60b3bbb7a72e <unknown>\n#7 0x60b3bbb7b79e <unknown>\n#8 0x60b3bbff1f1b <unknown>\n#9 0x60b3bbff5eb8 <unknown>\n#10 0x60b3bbfdf42c <unknown>\n#11 0x60b3bbff6a37 <unknown>\n#12 0x60b3bbfc3fef <unknown>\n#13 0x60b3bc014ad8 <unknown>\n#14 0x60b3bc014ca0 <unknown>\n#15 0x60b3bc025556 <unknown>\n#16 0x79ccca494ac3 <unknown>\n"
+    },
+    {
+        "Channel ID": "UC9zs_bkRRTJa2kRsakFaFmw",
+        "Subscribers": "1.06M",
+        "Total Views": "344,046,383",
+        "Estimated Monthly Earnings": "US"
+    },
+    {
+        "Channel ID": "UCNlfGuzOAKM1sycPuM_QTHg",
+        "Error": "Message: disconnected: not connected to DevTools\n  (failed to check if window was closed: disconnected: not connected to DevTools)\n  (Session info: chrome=130.0.6723.116)\nStacktrace:\n#0 0x5fc9958ce6da <unknown>\n#1 0x5fc9953e2f80 <unknown>\n#2 0x5fc9953ca098 <unknown>\n#3 0x5fc9953c9f73 <unknown>\n#4 0x5fc9953e5272 <unknown>\n#5 0x5fc995471f6f <unknown>\n#6 0x5fc995453953 <unknown>\n#7 0x5fc99542272e <unknown>\n#8 0x5fc99542379e <unknown>\n#9 0x5fc995899f1b <unknown>\n#10 0x5fc99589deb8 <unknown>\n#11 0x5fc99588742c <unknown>\n#12 0x5fc99589ea37 <unknown>\n#13 0x5fc99586bfef <unknown>\n#14 0x5fc9958bcad8 <unknown>\n#15 0x5fc9958bcca0 <unknown>\n#16 0x5fc9958cd556 <unknown>\n#17 0x75f6dee94ac3 <unknown>\n"
+    },
+    {
+        "Channel ID": "UCUNdI_0sMbWfNtnNEy-K0AA",
+        "Error": "Message: disconnected: not connected to DevTools\n  (failed to check if window was closed: disconnected: not connected to DevTools)\n  (Session info: chrome=130.0.6723.116)\nStacktrace:\n#0 0x5cf1810836da <unknown>\n#1 0x5cf180b97f80 <unknown>\n#2 0x5cf180b7f098 <unknown>\n#3 0x5cf180b7ef73 <unknown>\n#4 0x5cf180b9a272 <unknown>\n#5 0x5cf180c26f6f <unknown>\n#6 0x5cf180c08953 <unknown>\n#7 0x5cf180bd772e <unknown>\n#8 0x5cf180bd879e <unknown>\n#9 0x5cf18104ef1b <unknown>\n#10 0x5cf181052eb8 <unknown>\n#11 0x5cf18103c42c <unknown>\n#12 0x5cf181053a37 <unknown>\n#13 0x5cf181020fef <unknown>\n#14 0x5cf181071ad8 <unknown>\n#15 0x5cf181071ca0 <unknown>\n#16 0x5cf181082556 <unknown>\n#17 0x7d985ce94ac3 <unknown>\n"
+    },
+    {
+        "Channel ID": "UC6NfBK72RMEIjxrad69-HAQ",
+        "Subscribers": "3.55K",
+        "Total Views": "2,760,605",
+        "Estimated Monthly Earnings": "AU"
+    }
+]

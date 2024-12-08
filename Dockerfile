@@ -13,6 +13,15 @@ RUN apt-get install -yqq unzip
 # Instalação do Selenium
 RUN pip install selenium
 
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pyvirtualdisplay and other dependencies
+RUN pip install pyvirtualdisplay
+
+
 # RUN rm -f /usr/local/bin/chromedriver
 # RUN wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/131.0.6778.85/chromedriver_linux64.zip
 # RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/

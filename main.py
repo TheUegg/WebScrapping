@@ -1,4 +1,5 @@
 import json
+import time
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -11,7 +12,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import WebDriverException
 from time import sleep
+from pyvirtualdisplay import Display
 import static
+from bs4 import BeautifulSoup
+import requests
+import re
 
 # Function to initialize the WebDriver
 def init_driver():
@@ -19,55 +24,6 @@ def init_driver():
     options.add_argument("--start-maximized")
     driver = webdriver.Chrome(options=options)
     return driver
-
-# Function to scroll and collect channels for a given keyword
-    # def collect_channels(driver, keyword, max_channels=10):
-    #     channels = set()
-    #     base_url = static.BASE_URL + keyword + static.TREAT_AS_VIDEO
-    #     driver.get(base_url)
-
-    #     print(f"Collecting channels for keyword: {keyword}")
-
-    #     scroll_attempts = 0
-    #     max_scroll_attempts = 20
-    #     while len(channels) < max_channels and scroll_attempts < max_scroll_attempts:
-    #         try:
-    #             # Find all channel links
-    #             elements = retry_on_stale(
-    #                 driver,
-    #                 lambda: driver.find_elements(By.XPATH, '//a[contains(@href, "/channel/") and not(contains(@href, "/user/"))]')
-    #             )
-    #             for element in elements:
-    #                 channel_url = element.get_attribute("href")
-    #                 if channel_url and channel_url not in channels:
-    #                     print(f"Collected channel: {channel_url}")
-    #                     channels.add(channel_url)
-    #                     if len(channels) >= max_channels:
-    #                         break
-
-    #             # Scroll down to load more results
-    #             driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
-    #             sleep(2)  # Adjust if necessary
-    #             scroll_attempts += 1
-    #             print(f"Scrolling attempt {scroll_attempts}. Collected {len(channels)} channels so far.")
-
-    #         except (NoSuchElementException, TimeoutException) as e:
-    #             print(f"Error encountered during scrolling: {e}")
-    #             scroll_attempts += 1
-    #             sleep(2)
-
-    #     print(f"Finished collecting {len(channels)} channels for keyword '{keyword}'.")
-    #     return list(channels)
-
-
-    # # Function to handle stale elements and retry operations
-    # def retry_on_stale(driver, find_element_fn, max_retries=5, delay=1):
-    #     for attempt in range(max_retries):
-    #         try:
-    #             return find_element_fn()
-    #         except StaleElementReferenceException:
-    #             sleep(delay)
-    #     raise StaleElementReferenceException("Max retries exceeded.")
 
     # Function to scrape data from Social Blade
 def scrape_socialblade(channel_url, retries=3, timeout=120):
@@ -129,24 +85,26 @@ def scrape_socialblade(channel_url, retries=3, timeout=120):
                 driver.quit()
                 return {'Channel ID': channel_id, 'Error': str(e)}
 
-def get_channel_urls():
+def get_channel_urls(driver):
     urls = []
     for url in static.URLS:
         links = []
         hrefs = []
         driver.get(url)
         sleep(5)
-            
+
         elements = []
         try:
-            elements = driver.find_elements(By.TAG_NAME, 'a')
+            elements = driver.find_elements(By.CSS_SELECTOR, 'a[data-testid="channel-card-link"]')
         except Exception as e:
             pass
 
+        print(f"Collected {len(elements)} elements.", flush=True)
+
         hrefs = [element.get_attribute('href') for element in elements]
-        print(f"Collected {len(hrefs)} links.", flush=True)
+        print(f"Collected {len(hrefs)} hrefs.", flush=True)
         print(hrefs, flush=True)
-        links = [href for href in hrefs if ("/youtube/c/" in href) or ("/youtube/channel/" in href)]
+        links = [href for href in hrefs if ("/youtube-stats/channel/" in href)]
 
         print(f"Collected {len(links)} channel links.", flush=True)
 
@@ -159,9 +117,104 @@ def get_channel_urls():
             except Exception as e:
                 print(f"Error collecting channel URL: {e}", flush=True)
                 pass
+
+
+        # # Get the page source
+        # page_source = driver.page_source
         
-    print(f"Collected {len(urls)} channel URLs.", flush=True)
+        # # Regular expression to extract all "channel_id" values
+        # channel_ids = re.findall(r'"channel_id":"([^"]+)"', page_source)
+        channel_ids = []
+        # scripts = driver.find_element_by_tag_name("script")  # Or use more specific locators
+        scripts = driver.find_elements(By.TAG_NAME, "script")
+        print(f"Collected {len(scripts)} scripts.", flush=True)
+        for script in scripts:
+            script_content = script.get_attribute("innerHTML")
+            print(f"Script content: {script_content}", flush=True)
+            
+            # Search for the pattern that contains the 'channel_id' in the script
+            # This regex assumes the data is in the format: channel_id: "UCxxxxxxx"
+            match = re.search(r'\"channel_id\":\"UC[0-9A-Za-z-]{21,}\"', script_content)
+            if match:
+                channel_ids.append(match.group(1))  # Add the channel_id to the list
+        
+        # remove duplicates
+        channel_ids = list(set(channel_ids))
+
+        # construct the channel URLs
+        base = [f"https://www.https://vidiq.com/youtube-stats/channel/{channel_id}" for channel_id in channel_ids]
+        urls.extend(base)
+        print(f"Collected {len(base)} channel URLs.", flush=True)
+
+        print(f"Collected {len(urls)} channel URLs.", flush=True)
+        print(urls, flush=True)
+
+
     return urls
+
+
+        #  # ---------------------------------------- PARTE 2 ----------------------------------------
+
+
+        # headers = {
+        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        # 'Accept-Encoding': 'gzip, deflate, br',
+        # 'Accept-Language': 'en-US,en;q=0.9',
+        # 'Connection': 'keep-alive',
+        # 'Referer': 'https://socialblade.com/',
+        # 'Upgrade-Insecure-Requests': '1'
+        # }
+
+        # response = requests.get(url, headers=headers)
+        # response.raise_for_status()
+        # soup = BeautifulSoup(response.text, 'html.parser')
+        # links = soup.find_all('a')
+        # print(f"Collected {len(links)} links.", flush=True)
+        # for link in links:
+        #     if "/youtube/c/" in link.get('href') or "/youtube/channel/" in link.get('href'):
+        #         urls.append(link.get('href'))
+        #         print("Collected channel URL:", link.get('href'), flush=True)
+
+        #  PARTE 3 -----------------------------------------
+
+        # urls = []
+
+        # # Set up Chrome options for headless mode
+        # options = Options()
+        # options.headless = True  # Run the browser in headless mode (no UI)
+
+        # # Make sure you have the chromedriver path correct or use a WebDriver manager
+        # driver = webdriver.Chrome(options=options)
+
+        # # URL to scrape
+        # url = 'https://socialblade.com/youtube/top/category/autos'  # Example URL
+
+        # try:
+        #     # Open the URL with Selenium
+        #     driver.get(url)
+
+        #     # Give the page some time to load
+        #     time.sleep(5)  # Adjust based on the speed of your internet connection
+
+        #     # Get the page source after it has loaded
+        #     page_source = driver.page_source
+
+        #     # Parse the page with BeautifulSoup
+        #     soup = BeautifulSoup(page_source, 'html.parser')
+        #     links = soup.find_all('a')
+        #     print(f"Collected {len(links)} links.", flush=True)
+
+        #     for link in links:
+        #         href = link.get('href')
+        #         if href and ("/youtube/c/" in href or "/youtube/channel/" in href):
+        #             urls.append(href)
+        #             print("Collected channel URL:", href, flush=True)
+
+        # finally:
+        #     # Close the browser after scraping
+        #     driver.quit()
+        #     return urls
 
 def get_driver() -> WebDriver:
 
@@ -179,7 +232,7 @@ def get_driver() -> WebDriver:
         except WebDriverException:
             print(f"Attempt {i+1}/{retries} failed, retrying...", flush=True)
             sleep(3)
-    raise Exception("Could not connect to Selenium server")
+        raise Exception("Could not connect to Selenium server")
 
 
     # Default=0
@@ -190,7 +243,24 @@ def get_driver() -> WebDriver:
 
 # Main execution
 if __name__ == "__main__":
+
+    try:
+        display = Display(visible=0, size=(1920, 1080))
+        display.start()
+    except Exception as e:
+        print(e, flush=True)
+        raise Exception("Erro ao iniciar display")
+
     driver = get_driver()
+
+    # Set up Chrome options for headless mode
+    # options = Options()
+    # options.headless = True  # Run the browser in headless mode (no UI)
+
+    # # Make sure you have the chromedriver path correct or use a WebDriver manager
+    # driver = webdriver.Chrome(options=options)
+
+
     try:
         # keywords = ["music", "gaming"]
         # max_channels_per_keyword = 10
@@ -199,7 +269,9 @@ if __name__ == "__main__":
         # for keyword in keywords:
         #     results[keyword] = collect_channels(driver, keyword, max_channels=max_channels_per_keyword)
 
-        urls = get_channel_urls()
+        urls = get_channel_urls(driver)
+
+        print(f'Collected {len(urls)} channel URLs. E terminou', flush=True)
 
         # Scrape data from Social Blade
         for url in urls:

@@ -127,17 +127,19 @@ def get_channel_urls(driver):
         channel_ids = []
         # scripts = driver.find_element_by_tag_name("script")  # Or use more specific locators
         scripts = driver.find_elements(By.TAG_NAME, "script")
-        print(f"Collected {len(scripts)} scripts.", flush=True)
+        # print(f"Collected {len(scripts)} scripts.", flush=True)
+
+        pattern = r'UC[0-9A-Za-z_-]{22}'
+
         for script in scripts:
             script_content = script.get_attribute("innerHTML")
             print(f"Script content: {script_content}", flush=True)
-            
-            # Search for the pattern that contains the 'channel_id' in the script
-            # This regex assumes the data is in the format: channel_id: "UCxxxxxxx"
-            match = re.search(r'\"channel_id\":\"UC[0-9A-Za-z-]{21,}\"', script_content)
+            match = re.findall(pattern, script_content)
+            print(f"Match {match} channel URLs.", flush=True)
             if match:
-                channel_ids.append(match.group(1))  # Add the channel_id to the list
+                channel_ids.extend(match)  # Add the channel_id to the list
         
+
         # remove duplicates
         channel_ids = list(set(channel_ids))
 

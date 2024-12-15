@@ -3,7 +3,7 @@ version: "3"
 services:
   chrome:
           image: selenium/standalone-chrome:4.15.0-20231129
-          restart: always
+          restart: "no"
           shm_size: 2gb
           ports:
             - 4444:4444
@@ -11,10 +11,10 @@ services:
 
   app:
           build: .
-          restart: always
+          restart: "no"
           ports:
             - 8000:8000
           depends_on:
             - chrome
           volumes:
-            - /outputs:/outputs
+            - ./outputs:/outputs

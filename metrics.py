@@ -1,8 +1,11 @@
+import matplotlib
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import re
 import json
+
+matplotlib.use('TkAgg')
 
 # Load the JSON file
 file_path = 'outputs/channel_urls.json'
@@ -81,26 +84,6 @@ df = df.dropna()
 
 # Show DataFrame
 print(df.head())
-
-# Plot Top 10 Channels by Subscribers
-top_subs = df.sort_values(by='Subscribers Total', ascending=False).head(10)
-plt.figure(figsize=(12, 6))
-plt.bar(top_subs['Channel Name'], top_subs['Subscribers Total'], color='skyblue')
-plt.title('Top 10 Channels by Subscribers (Total)')
-plt.xticks(rotation=45, ha='right')
-plt.ylabel('Subscribers (Total)')
-plt.tight_layout()
-plt.show()
-
-# Plot Top 10 Channels by Video Views
-top_views = df.sort_values(by='Video Views Total (B)', ascending=False).head(10)
-plt.figure(figsize=(12, 6))
-plt.bar(top_views['Channel Name'], top_views['Video Views Total (B)'], color='lightgreen')
-plt.title('Top 10 Channels by Video Views (in Billions)')
-plt.xticks(rotation=45, ha='right')
-plt.ylabel('Video Views (B)')
-plt.tight_layout()
-plt.show()
 
 # Set up seaborn for better aesthetics
 sns.set(style="whitegrid")

@@ -40,8 +40,6 @@ def get_channel_data(driver, channel_url):
     }
 
     try:
-        # Wait for the necessary elements to load
-        #WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.yt-formatted-string')))
 
         try:
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[contains(@class, "yt-formatted-string") and contains(text(), " subscribers")]')))
@@ -52,42 +50,42 @@ def get_channel_data(driver, channel_url):
             channel_data["subscribers"] = "N/A"
 
 
-        # Scraping Subscriber count (adjust as needed)
+        # Scraping Subscriber count
         subscribers_elem = driver.find_element(By.XPATH, '//*[contains(@class, "yt-formatted-string") and contains(text(), " subscribers")]')
         if subscribers_elem:
             channel_data["subscribers"] = subscribers_elem.text.strip()
 
-        # Scraping Video views (adjust as needed)
+        # Scraping Video views
         views_elem = driver.find_element(By.XPATH, '//*[contains(@class, "view-count") and contains(text(), " views")]')
         if views_elem:
             channel_data["video_views"] = views_elem.text.strip()
 
-        # Scraping Engagement Rate (adjust as needed)
+        # Scraping Engagement Rate
         engagement_rate_elem = driver.find_element(By.XPATH, '//span[contains(text(), "Engagement Rate")]/following-sibling::span')
         if engagement_rate_elem:
             channel_data["engagement_rate"] = engagement_rate_elem.text.strip()
 
-        # Scraping Video Upload Frequency (adjust as needed)
+        # Scraping Video Upload Frequency
         upload_frequency_elem = driver.find_element(By.XPATH, '//*[contains(@class, "upload-frequency")]/following-sibling::span')
         if upload_frequency_elem:
             channel_data["video_upload_frequency"] = upload_frequency_elem.text.strip()
 
-        # Scraping Location (adjust as needed)
+        # Scraping Location
         location_elem = driver.find_element(By.XPATH, '//*[contains(@class, "location")]')
         if location_elem:
             channel_data["location"] = location_elem.text.strip()
 
-        # Scraping Category (adjust as needed)
+        # Scraping Category
         category_elem = driver.find_element(By.XPATH, '//*[contains(text(), "Category")]/following-sibling::span')
         if category_elem:
             channel_data["category"] = category_elem.text.strip()
 
-        # Scraping number of videos (adjust as needed)
+        # Scraping number of videos
         videos_elem = driver.find_element(By.XPATH, '//*[contains(text(), "Videos")]/following-sibling::span')
         if videos_elem:
             channel_data["videos"] = videos_elem.text.strip()
 
-        # Scraping Average video length (adjust as needed)
+        # Scraping Average video length
         avg_video_length_elem = driver.find_element(By.XPATH, '//*[contains(text(), "Avg. Video Length")]/following-sibling::span')
         if avg_video_length_elem:
             channel_data["average_video_length"] = avg_video_length_elem.text.strip()
@@ -174,7 +172,6 @@ def check_duplicates(urls):
     # Check for duplicates by comparing the length of the list and the set
     if len(url_list) != len(set(url_list)):
         print("Duplicates found in the collected URLs.", flush=True)
-        # Optionally, log or print out the duplicates
         seen = set()
         duplicates = [url for url in url_list if url in seen or seen.add(url)]
         print(f"Duplicate URLs: {duplicates}", flush=True)
@@ -237,7 +234,6 @@ def scrape_channel_data(driver, channel_url):
         """
 
         location = driver.execute_script(location_script)
-        #print("Location:", location)
 
         # Extract the category using JavaScript execution
         category_script = """
@@ -247,20 +243,17 @@ def scrape_channel_data(driver, channel_url):
         """
 
         category = driver.execute_script(category_script)
-        #print("Category:", category)
 
         # Extract Location
         try:
-            #location_elem = driver.find_element(By.XPATH, "//div[contains(text(), 'Location')]/following-sibling::div")
-            channel_data["location"] = location#location_elem.text.strip() if location_elem else "N/A"
+            channel_data["location"] = location
         except Exception as e:
             print(f"Error scraping location for {channel_url}: {e}", flush=True)
             channel_data["location"] = "N/A"
 
         # Extract Category
         try:
-            #category_elem = driver.find_element(By.XPATH, "//div[contains(text(), 'Category')]/following-sibling::div")
-            channel_data["category"] = category#category_elem.text.strip() if category_elem else "N/A"
+            channel_data["category"] = category
         except Exception as e:
             print(f"Error scraping category for {channel_url}: {e}", flush=True)
             channel_data["category"] = "N/A"

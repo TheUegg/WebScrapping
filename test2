@@ -1,0 +1,184 @@
+import json
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import WebDriverException
+from time import sleep
+import re
+import static
+
+# Function to initialize the WebDriver
+def init_driver():
+    options = webdriver.ChromeOptions()
+    options.add_argument("--start-maximized")
+    driver = webdriver.Chrome(options=options)
+    return driver
+
+# Function to scrape additional channel details
+def get_channel_data(driver, channel_url):
+    print(f"Scraping data for channel: {channel_url}", flush=True)
+    driver.get(channel_url)
+    sleep(5)
+
+    # Define a dictionary to store channel data
+    channel_data = {
+        "url": channel_url,
+        "subscribers": "N/A",
+        "video_views": "N/A",
+        "engagement_rate": "N/A",
+        "video_upload_frequency": "N/A",
+        "location": "N/A",
+        "category": "N/A",
+        "videos": "N/A",
+        "average_video_length": "N/A"
+    }
+
+    try:
+        # Scraping Subscribers count
+        try:
+            subscribers_elem = driver.find_element(By.XPATH, '//*[contains(@class, "yt-formatted-string") and contains(text(), " subscribers")]')
+            channel_data["subscribers"] = subscribers_elem.text.strip() if subscribers_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping subscribers for {channel_url}: {e}", flush=True)
+
+        # Scraping Video views
+        try:
+            views_elem = driver.find_element(By.XPATH, '//*[contains(@class, "view-count") and contains(text(), " views")]')
+            channel_data["video_views"] = views_elem.text.strip() if views_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping video views for {channel_url}: {e}", flush=True)
+
+        # Scraping Engagement Rate
+        try:
+            engagement_rate_elem = driver.find_element(By.XPATH, '//span[contains(text(), "Engagement Rate")]/following-sibling::span')
+            channel_data["engagement_rate"] = engagement_rate_elem.text.strip() if engagement_rate_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping engagement rate for {channel_url}: {e}", flush=True)
+
+        # Scraping Video Upload Frequency
+        try:
+            upload_frequency_elem = driver.find_element(By.XPATH, '//*[contains(@class, "upload-frequency")]/following-sibling::span')
+            channel_data["video_upload_frequency"] = upload_frequency_elem.text.strip() if upload_frequency_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping upload frequency for {channel_url}: {e}", flush=True)
+
+        # Scraping Location
+        try:
+            location_elem = driver.find_element(By.XPATH, '//*[contains(@class, "location")]')
+            channel_data["location"] = location_elem.text.strip() if location_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping location for {channel_url}: {e}", flush=True)
+
+        # Scraping Category
+        try:
+            category_elem = driver.find_element(By.XPATH, '//*[contains(text(), "Category")]/following-sibling::span')
+            channel_data["category"] = category_elem.text.strip() if category_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping category for {channel_url}: {e}", flush=True)
+
+        # Scraping number of videos
+        try:
+            videos_elem = driver.find_element(By.XPATH, '//*[contains(text(), "Videos")]/following-sibling::span')
+            channel_data["videos"] = videos_elem.text.strip() if videos_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping video count for {channel_url}: {e}", flush=True)
+
+        # Scraping Average video length
+        try:
+            avg_video_length_elem = driver.find_element(By.XPATH, '//*[contains(text(), "Avg. Video Length")]/following-sibling::span')
+            channel_data["average_video_length"] = avg_video_length_elem.text.strip() if avg_video_length_elem else "N/A"
+        except Exception as e:
+            print(f"Error scraping average video length for {channel_url}: {e}", flush=True)
+
+    except Exception as e:
+        print(f"Error scraping channel data for {channel_url}: {e}", flush=True)
+
+    return channel_data
+
+def get_channel_urls(driver):
+    urls = set()  # Use a set to store unique URLs
+    target_count = 1000  # Target number of unique channel URLs
+
+    for url in static.URLS:
+        if len(urls) >= target_count:
+            print(f"Target of {target_count} channel URLs reached.", flush=True)
+            break  # Stop if target count is met
+
+        print(f"Visiting URL: {url}", flush=True)
+        driver.get(url)
+        sleep(5)
+
+        try:
+            scripts = driver.find_elements(By.TAG_NAME, "script")
+            pattern = r'UC[0-9A-Za-z_-]{22}'
+
+            for script in scripts:
+                script_content = script.get_attribute("innerHTML")
+                matches = re.findall(pattern, script_content)
+
+                # Construct the channel URLs and add only unique ones
+                for match in matches:
+                    channel_link = f"https://www.vidiq.com/youtube-stats/channel/{match}"
+                    if channel_link not in urls:
+                        urls.add(channel_link)
+
+                print(f"Collected {len(matches)} additional links from script tags. Total unique URLs: {len(urls)}", flush=True)
+
+                if len(urls) >= target_count:
+                    print(f"Target of {target_count} channel URLs reached.", flush=True)
+                    break
+
+        except Exception as e:
+            print(f"Error parsing script tags: {e}", flush=True)
+
+    print(f"Final count of unique channel URLs: {len(urls)}", flush=True)
+    return list(urls)  # Convert set to list for further processing
+
+def save_to_json(data, filename="channel_data.json"):
+    output_file = f"/outputs/{filename}"
+
+    with open(output_file, "w") as json_file:
+        json.dump(data, json_file, indent=4)
+
+    print(f"Saved {len(data)} channel data entries to {output_file}.", flush=True)
+
+def scrape_channels(driver, urls):
+    all_channel_data = []
+    for channel_url in urls:
+        print(f"Scraping data for channel: {channel_url}", flush=True)
+        channel_data = get_channel_data(driver, channel_url)
+        if channel_data:
+            all_channel_data.append(channel_data)
+    return all_channel_data
+
+def check_duplicates(urls):
+    if len(urls) != len(set(urls)):
+        print("Duplicates found in the collected URLs.", flush=True)
+        seen = set()
+        duplicates = [url for url in urls if url in seen or seen.add(url)]
+        print(f"Duplicate URLs: {duplicates}", flush=True)
+    else:
+        print("No duplicates found in the collected URLs.", flush=True)
+
+# Main execution
+if __name__ == "__main__":
+    driver = init_driver()
+
+    try:
+        # Collect the channel URLs
+        urls = get_channel_urls(driver)
+
+        # Check for duplicates after collecting all URLs
+        check_duplicates(urls)
+
+        # Scrape data for each channel
+        channel_data = scrape_channels(driver, urls)
+
+        # Save collected data to a JSON file
+        save_to_json(channel_data)  # Save scraped data to a JSON file
+        print(f'Collected data for {len(channel_data)} channels. Process completed.', flush=True)
+    finally:
+        driver.quit()
+
+    exit(0)
